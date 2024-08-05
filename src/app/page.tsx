@@ -1,75 +1,84 @@
 'use client';
 
-import { useState, useEffect, useRef, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, firestore } from './lib/firebase-config';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { FaEnvelope, FaLock, FaLinkedin, FaGithub, FaTimes, FaSun, FaMoon } from 'react-icons/fa';
-import LoadingPage from './components/LoadinPage'; 
+import { collection, doc, setDoc, getDocs, query, where } from 'firebase/firestore';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEnvelope, faLock, faSignOutAlt, faTimes, faSun, faMoon, faUser, faHome, faTshirt, faLaptop, faShoppingCart, faSearch, faUtensils, faCopyright } from '@fortawesome/free-solid-svg-icons';
+import LoadingPage from './components/LoadingPage';
+import { useAuth } from './auth/AuthContext';
 
 const Page = () => {
-  const [email, setEmail] = useState('');
+  const { user, username, loading: authLoading } = useAuth();
+  const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [usernameInput, setUsernameInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null); 
-
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const router = useRouter(); 
+  const [showLoadingPage, setShowLoadingPage] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 3000);
-    return () => clearTimeout(timer);
+    if (!authLoading) {
+      setLoading(false);
+      setShowLoadingPage(false);
+    }
+  }, [authLoading]);
+
+  useEffect(() => {
+    if (window.performance && performance.navigation.type === 1) {
+      setShowLoadingPage(true);
+    } else {
+      setShowLoadingPage(false);
+    }
   }, []);
-
-  useEffect(() => {
-    if (!isLoggedIn || successMessage) return; 
-
-    const fetchVideoUrl = async () => {
-      try {
-        const docRef = doc(firestore, '001', 'video-uwu');
-        const docSnap = await getDoc(docRef);
-
-        if (!docSnap.exists()) throw new Error('No video found');
-        
-        const { videos } = docSnap.data() || {};
-        if (!videos) throw new Error('Video URL is undefined or empty');
-
-        const fileId = videos.match(/\/d\/(.*?)\//)?.[1];
-        if (!fileId) throw new Error('Unable to extract file ID from URL');
-
-        setVideoUrl(`https://drive.google.com/file/d/${fileId}/preview`);
-      } catch (err) {
-        setError((err as Error).message || 'An unexpected error occurred.');
-      }
-    };
-
-    fetchVideoUrl();
-  }, [isLoggedIn, successMessage]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     try {
-      isSignUp
-        ? await createUserWithEmailAndPassword(auth, email, password)
-        : await signInWithEmailAndPassword(auth, email, password);
-        
       if (isSignUp) {
-        setSuccessMessage("Sign Up Successfully!"); 
-        setIsLoggedIn(true);
-        setIsFormVisible(false);
+        await createUserWithEmailAndPassword(auth, emailOrUsername, password);
+        await setDoc(doc(firestore, 'users', auth.currentUser?.uid || ''), { username: usernameInput, email: emailOrUsername });
+        setSuccessMessage('Sign Up Successfully! Please log in.');
+        setIsSignUp(false);
+        setIsFormVisible(true);
+        setEmailOrUsername('');
+        setPassword('');
+        setUsernameInput('');
       } else {
-        setIsLoggedIn(true);
-        setIsFormVisible(false);
+        const isEmail = emailOrUsername.includes('@');
+        let userEmail;
+
+        if (isEmail) {
+          await signInWithEmailAndPassword(auth, emailOrUsername, password);
+          router.push('/');
+        } else {
+          const userQuery = query(collection(firestore, 'users'), where('username', '==', emailOrUsername));
+          const userSnap = await getDocs(userQuery);
+
+          if (!userSnap.empty) {
+            const userDoc = userSnap.docs[0];
+            userEmail = userDoc.data().email;
+            await signInWithEmailAndPassword(auth, userEmail, password);
+            router.push('/');
+          } else {
+            setError('Username does not exist.');
+          }
+        }
       }
     } catch (err) {
       setError((err as Error).message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,166 +86,178 @@ const Page = () => {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  if (loading) return <LoadingPage />;
+  if (showLoadingPage) return <LoadingPage />;
 
-  const formClasses = `flex items-center border rounded-lg shadow-sm ${theme === 'light' ? 'bg-gray-100 border-gray-300' : 'bg-gray-700 border-gray-600'}`;
-  const inputClasses = `flex-1 p-2 border-none rounded-lg ${theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-white'}`;
+  const formClasses = `flex flex-col items-center border rounded-lg shadow-md p-4 ${theme === 'light' ? 'bg-gray-100 border-gray-300' : 'bg-gray-700 border-gray-600'}`;
+  const inputClasses = `w-full p-2 mb-2 border rounded-lg ${theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-white'}`;
   const buttonClasses = `w-full py-2 rounded-full shadow-md transition duration-200 ${theme === 'light' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-600 hover:bg-gray-500'} text-white`;
 
   return (
     <div className={`font-poppins ${theme === 'light' ? 'text-gray-800 bg-gradient-to-b from-gray-100 to-gray-200' : 'text-white bg-gradient-to-b from-black to-gray-900'}`}>
-      <header className={`fixed top-0 left-0 right-0 ${theme === 'light' ? 'bg-white text-gray-800 shadow-md' : 'bg-black text-white border-b border-gray-800'} shadow-md z-50`}>
-        <nav className="flex justify-between items-center p-4">
-          <h1 className="text-2xl font-bold">SAMAN</h1>
-          <button
-            onClick={() => {
-              setIsSignUp(false);
-              setIsFormVisible(prev => !prev);
-            }}
-            className={`px-4 py-2 rounded-full border ${theme === 'light' ? 'border-blue-600 text-blue-600 hover:bg-blue-100' : 'border-blue-500 text-blue-500 hover:bg-blue-600'} bg-transparent hover:bg-opacity-10 transition duration-200`}
-          >
-            {isFormVisible ? <FaTimes size={20} /> : 'Log In'}
-          </button>
-        </nav>
-      </header>
+      <header className={`fixed top-0 left-0 right-0 p-4 ${theme === 'light' ? 'bg-white text-gray-800 shadow-md' : 'bg-black text-white border-b border-gray-800'} z-50`}>
+  <nav className="flex items-center justify-between max-w-7xl mx-auto">
+  <h1 className="text-2xl font-bold flex items-center space-x-2">
+      <span>SAMAN</span>
+      <button
+        onClick={toggleTheme}
+        className={`p-2 rounded-full border ${theme === 'light' ? 'border-gray-300 hover:bg-gray-100' : 'border-gray-600 hover:bg-gray-700'} transition duration-200 bg-transparent flex items-center justify-center`}
+      >
+        <FontAwesomeIcon icon={theme === 'light' ? faMoon : faSun} />
+      </button>
+    </h1>{user ? (
+      <div className="flex items-center space-x-4">
+        <span className="flex items-center space-x-2">
+          <FontAwesomeIcon icon={faUser} size="lg" />
+          <span>{username || user.email}</span>
+        </span>
+        <button
+          onClick={() => auth.signOut()}
+          className={`px-4 py-2 rounded-full border ${theme === 'light' ? 'border-red-600 text-red-600 hover:bg-red-100' : 'border-red-500 text-red-500 hover:bg-red-600'} bg-transparent hover:bg-opacity-10 transition duration-200`}
+        >
+          <FontAwesomeIcon icon={faSignOutAlt} />
+        </button>
+      </div>
+    ) : (
+      <button
+        onClick={() => setIsFormVisible(prev => !prev)}
+        className={`px-4 py-2 rounded-full border ${theme === 'light' ? 'border-blue-600 text-blue-600 hover:bg-blue-100' : 'border-blue-500 text-blue-500 hover:bg-blue-600'} bg-transparent hover:bg-opacity-10 transition duration-200`}
+      >
+        {isFormVisible ? <FontAwesomeIcon icon={faTimes} size="lg" /> : 'Log In'}
+      </button>
+    )}
+  </nav>
+</header>
+
 
       <main className="pt-16">
         {successMessage ? (
           <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            {successMessage === "You have been cutely rickrolled!" && videoUrl && (
-              <>
-                <iframe
-                  ref={iframeRef}
-                  src={videoUrl}
-                  width="800"
-                  height="450"
-                  frameBorder="0"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                  title="Video"
-                  className="rounded-lg shadow-md"
-                />
-                <h1 className={`text-3xl font-bold mt-4 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{successMessage}</h1>
-              </>
-            )}
-            {successMessage === "Sign Up Successfully!" && (
-              <>
-                <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{successMessage}</h1>
-                <button
-                  onClick={() => router.back()} 
-                  className={`px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition duration-200 mt-4`}
-                >
-                  Go Back
-                </button>
-              </>
-            )}
-          </div>
-        ) : isLoggedIn ? (
-          <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            {videoUrl ? (
-              <iframe
-                ref={iframeRef}
-                src={videoUrl}
-                width="800"
-                height="450"
-                frameBorder="0"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                title="Video"
-                className="rounded-lg shadow-md"
-              />
-            ) : (
-              <h1 className={`text-4xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>u Have been cutely rickrolled....</h1>
-            )}
+            <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{successMessage}</h1>
+            <p className="mt-4 text-lg">
+              do <button
+                onClick={() => {
+                  setIsFormVisible(true);
+                  setIsSignUp(false);
+                  setSuccessMessage(null);
+                }}
+                className="text-blue-500 hover:underline"
+              >
+                refresh
+              </button>.
+            </p>
           </div>
         ) : (
           <div className="flex items-center justify-center min-h-screen">
-            {!isFormVisible ? (
-              <h1 className={`text-4xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>Welcome to Our Platform!</h1>
-            ) : (
-              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
-                <div className={`w-full max-w-md p-8 border rounded-lg shadow-lg ${theme === 'light' ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-600'}`}>
-                  <h1 className={`text-2xl font-bold text-center mb-6 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-                    {isSignUp ? 'Sign Up' : 'Sign In'}
-                  </h1>
-                  {error && <p className={`text-red-500 text-center mb-4`}>{error}</p>}
-                  <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <div className={formClasses}>
-                      <div className={`flex items-center justify-center w-10 h-10 ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
-                        <FaEnvelope size={20} />
-                      </div>
+            {!user ? (
+              <div className="flex flex-col items-center w-full max-w-lg p-4">
+                {isFormVisible && (
+                  <form onSubmit={handleSubmit} className={formClasses}>
+                    <div className="flex items-center mb-4">
+                      <FontAwesomeIcon icon={faUser} className="mr-2 text-gray-500 dark:text-gray-400" />
                       <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
+                        type="text"
+                        placeholder={isSignUp ? 'Username' : 'Username or Email'}
+                        value={isSignUp ? usernameInput : emailOrUsername}
+                        onChange={(e) => isSignUp ? setUsernameInput(e.target.value) : setEmailOrUsername(e.target.value)}
                         className={inputClasses}
                       />
                     </div>
-                    <div className={formClasses}>
-                      <div className={`flex items-center justify-center w-10 h-10 ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
-                        <FaLock size={20} />
+
+                    {isSignUp && (
+                      <div className="flex items-center mb-4">
+                        <FontAwesomeIcon icon={faEnvelope} className="mr-2 text-gray-500 dark:text-gray-400" />
+                        <input
+                          type="text"
+                          placeholder="Email"
+                          value={emailOrUsername}
+                          onChange={(e) => setEmailOrUsername(e.target.value)}
+                          className={inputClasses}
+                        />
                       </div>
+                    )}
+
+                    <div className="flex items-center mb-4">
+                      <FontAwesomeIcon icon={faLock} className="mr-2 text-gray-500 dark:text-gray-400" />
                       <input
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        required
                         className={inputClasses}
                       />
                     </div>
                     <button type="submit" className={buttonClasses}>
-                      {isSignUp ? 'Sign Up' : 'Sign In'}
+                      {isSignUp ? 'Sign Up' : 'Log In'}
+                    </button>
+                    {error && <p className="text-red-600 mt-2">{error}</p>}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSignUp(prev => !prev);
+                        setError(null);
+                      }}
+                      className="mt-2 text-blue-500 hover:underline"
+                    >
+                      {isSignUp ? 'Already have an account? Log In' : 'Don’t have an account? Sign Up'}
                     </button>
                   </form>
-                  <div className="mt-4 text-center">
+                )}
+                {!isFormVisible && !user && (
+                  <div className="flex flex-col items-center justify-center w-full max-w-md p-4">
+                    <p className={`text-lg ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+                      Welcome to SAMAN. Please {isSignUp ? 'sign up' : 'log in'} to continue.
+                    </p>
                     <button
-                      onClick={() => setIsSignUp(prev => !prev)}
-                      className={`text-blue-500 hover:underline ${theme === 'light' ? 'text-blue-600' : 'text-blue-400'}`}
+                      onClick={() => setIsFormVisible(true)}
+                      className={`mt-4 px-4 py-2 rounded-full border ${theme === 'light' ? 'border-blue-600 text-blue-600 hover:bg-blue-100' : 'border-blue-500 text-blue-500 hover:bg-blue-600'} bg-transparent hover:bg-opacity-10 transition duration-200`}
                     >
-                      {isSignUp ? 'Already have an account? Log In' : "Don't have an account? Sign Up"}
+                      {isSignUp ? 'Sign Up' : 'Log In'}
                     </button>
                   </div>
-                </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center min-h-screen">
+                <p className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+                  Welcome back, {username || user.email}
+                </p>
               </div>
             )}
           </div>
         )}
       </main>
-
-      <footer className={`fixed bottom-0 left-0 right-0 py-4 ${theme === 'light' ? 'bg-gray-100 text-gray-800' : 'bg-gray-800 text-white'}`}>
-        <div className="flex flex-col items-center">
-          <div className="text-center mb-4">
-            <p className={`mb-1 ${theme === 'light' ? 'text-gray-600' : 'text-white'}`}>© 2024 Safallama</p>
-            <p className={`mb-1 ${theme === 'light' ? 'text-gray-600' : 'text-white'}`}>Organization: Vercel</p>
-            <p className={`mb-1 ${theme === 'light' ? 'text-gray-600' : 'text-white'}`}>Creator: safal lama</p>
-            <p className={`${theme === 'light' ? 'text-gray-600' : 'text-white'}`}>Email: yoyuehappy@gmail.com</p>
-          </div>
-          <div className="flex gap-4 mb-4">
-            <a href="mailto:contact@safallama.com" aria-label="Email Safallama" className={`hover:text-white ${theme === 'light' ? 'text-gray-600' : 'text-white'} transition-transform transform hover:scale-110`}>
-              <FaEnvelope size={24} />
-            </a>
-            <a href="https://linkedin.com" aria-label="Safallama LinkedIn" className={`hover:text-white ${theme === 'light' ? 'text-gray-600' : 'text-white'} transition-transform transform hover:scale-110`}>
-              <FaLinkedin size={24} />
-            </a>
-            <a href="https://github.com" aria-label="Safallama GitHub" className={`hover:text-white ${theme === 'light' ? 'text-gray-600' : 'text-white'} transition-transform transform hover:scale-110`}>
-              <FaGithub size={24} />
-            </a>
-          </div>
-          <div className="absolute bottom-4 right-4">
-            <button
-              aria-label="Toggle dark/light mode"
-              onClick={toggleTheme}
-              className={`flex items-center justify-center px-4 py-2 rounded-full border ${theme === 'light' ? 'border-gray-700 text-gray-700 hover:bg-gray-100' : 'border-gray-600 text-gray-600 hover:bg-gray-700'} bg-transparent hover:bg-opacity-10 transition-all`}
-            >
-              {theme === 'light' ? <FaMoon size={20} /> : <FaSun size={20} />}
-            </button>
-          </div>
-        </div>
-      </footer>
+      <footer className={`fixed bottom-0 left-0 right-0 p-4 ${theme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-gray-800 text-white'} border-t border-gray-300`}>
+  <div className="flex justify-between items-center max-w-7xl mx-auto">
+    <div className="flex items-center space-x-4">
+      <a href="#home" className="text-lg hover:text-blue-500 transition duration-200">
+        <FontAwesomeIcon icon={faHome} className="text-sm" />
+      </a>
+      <a href="#food" className="text-lg hover:text-blue-500 transition duration-200">
+        <FontAwesomeIcon icon={faUtensils} className="text-sm" />
+      </a>
+      <a href="#clothes" className="text-lg hover:text-blue-500 transition duration-200">
+        <FontAwesomeIcon icon={faTshirt} className="text-sm" />
+      </a>
+      <a href="#techs" className="text-lg hover:text-blue-500 transition duration-200">
+        <FontAwesomeIcon icon={faLaptop} className="text-sm" />
+      </a>
+      <a href="#shopping" className="text-lg hover:text-blue-500 transition duration-200">
+        <FontAwesomeIcon icon={faShoppingCart} className="text-sm" />
+      </a>
+      <a href="#search" className="text-lg hover:text-blue-500 transition duration-200">
+        <FontAwesomeIcon icon={faSearch} className="text-sm" />
+      </a>
     </div>
+    <div className="flex items-center space-x-4">
+    </div>
+    <div className="text-center text-xs">
+      <p>Contact us: info@saman.com</p>
+      <p>About us</p>
+      <p>&copy; 2024 SAMAN</p>
+    </div>
+  </div>
+</footer>
+  </div>
   );
 };
 
