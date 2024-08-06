@@ -29,7 +29,7 @@ const Navbar = () => {
             <div className="absolute right-0 mt-2 w-48 bg-gray-900 text-white rounded-lg shadow-lg">
               <button
                 onClick={() => {
-                  // Add logout functionality here
+                 
                 }}
                 className="w-full px-4 py-2 text-left hover:bg-gray-800"
               >
