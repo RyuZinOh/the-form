@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
@@ -9,7 +9,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithP
 import { collection, doc, setDoc, getDoc, query, where, getDocs } from 'firebase/firestore';
 import { auth, firestore } from '../lib/firebase-config';
 
-const Food = () => {
+const Tech = () => {
   const { user, updateUserProfile } = useAuth();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -24,10 +24,9 @@ const Food = () => {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  const { username } = useAuth();
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
-  
+
     try {
       const { user } = await signInWithPopup(auth, provider);
 
@@ -104,7 +103,7 @@ const Food = () => {
 
   useEffect(() => {
     if (user) {
-      setIsFormVisible(false); 
+      setIsFormVisible(false);
     }
   }, [user]);
 
@@ -120,15 +119,17 @@ const Food = () => {
       <main className="pt-16">
         {!user ? (
           <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>Food</h1>
+            <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+              Tech
+            </h1>
             <p className={`text-lg ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-              Discover our food offerings.
+              Explore the technologies and tools I use.
             </p>
             <button
               onClick={() => setIsFormVisible(prev => !prev)}
               className={`mt-4 px-4 py-2 rounded-full border ${theme === 'light' ? 'border-blue-600 text-blue-600 hover:bg-blue-100' : 'border-blue-500 text-blue-500 hover:bg-blue-600'} bg-transparent hover:bg-opacity-10 transition duration-200`}
             >
-              {isFormVisible ? 'Close Form' : 'Open Form'}
+              {isFormVisible ? 'Close Form' : 'Open Login Form'}
             </button>
 
             {isFormVisible && (
@@ -152,7 +153,12 @@ const Food = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>Welcome to the Food Page, {username}</h1>
+            <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+              Welcome 
+            </h1>
+            <p className={`text-lg ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+              this is tech area
+            </p>
           </div>
         )}
       </main>
@@ -161,4 +167,4 @@ const Food = () => {
   );
 };
 
-export default Food;
+export default Tech;

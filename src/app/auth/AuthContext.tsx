@@ -1,3 +1,5 @@
+// src/app/auth/AuthContext.tsx
+
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -25,29 +27,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log("Auth state changed:", user); // Debugging
-
-      setUser(user);
-      if (user) {
-        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
-        if (userDoc.exists()) {
-          setUsername(userDoc.data()?.username || null);
-        } else {
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      console.log('Auth state changed:', authUser);
+      if (authUser) {
+        setUser(authUser);
+        try {
+          const userDoc = await getDoc(doc(firestore, 'users', authUser.uid));
+          if (userDoc.exists()) {
+            setUsername(userDoc.data()?.username || null);
+          } else {
+            setUsername(null);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
           setUsername(null);
         }
       } else {
+        setUser(null);
         setUsername(null);
       }
-      setLoading(false);
+      setLoading(false); 
     });
 
     return () => unsubscribe();
   }, []);
 
   const updateUserProfile = async (profile: { username?: string | null; photoURL?: string | null }) => {
-    try {
-      if (user) {
+    if (user) {
+      try {
         const userRef = doc(firestore, 'users', user.uid);
         await setDoc(userRef, { 
           username: profile.username || null, 
@@ -55,19 +62,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }, { merge: true });
   
         setUsername(profile.username || username || null);
-  
         console.log("Profile updated with:", {
           username: profile.username,
           photoURL: profile.photoURL,
-        }); 
-      } else {
-        console.log("No user logged in for profile update"); // Suppress error
+        });
+      } catch (error) {
+        console.error("Error updating user profile:", error);
       }
-    } catch (error) {
-      console.error("Error updating user profile:", error);
+    } else {
+      console.log("No user logged in for profile update");
     }
   };
-  
   
   return (
     <AuthContext.Provider value={{ user, username, loading, updateUserProfile }}>

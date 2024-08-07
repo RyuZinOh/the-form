@@ -71,3 +71,19 @@ input {
 .success {
   color: green;
 }
+
+
+@keyframes expand {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-expand {
+  animation: expand 0.3s ease-out;
+}

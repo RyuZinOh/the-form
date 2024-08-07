@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import AuthPage from '../page';
-import { FaUserCircle, FaTimes } from 'react-icons/fa';
+import { FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '../auth/AuthContext';
+import { auth } from '../lib/firebase-config'; 
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,15 @@ const Navbar = () => {
 
   const toggleAuthPage = () => setIsOpen(prev => !prev);
   const toggleProfileMenu = () => setIsProfileOpen(prev => !prev);
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      setIsProfileOpen(false); 
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   return (
     <nav className="fixed top-0 right-0 p-4 bg-gray-800 text-white w-full flex justify-between items-center">
@@ -28,9 +38,7 @@ const Navbar = () => {
           {isProfileOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-gray-900 text-white rounded-lg shadow-lg">
               <button
-                onClick={() => {
-                 
-                }}
+                onClick={handleLogout}
                 className="w-full px-4 py-2 text-left hover:bg-gray-800"
               >
                 Log Out
