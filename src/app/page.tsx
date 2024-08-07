@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import { auth, firestore } from './lib/firebase-config';
 import {
   createUserWithEmailAndPassword,
-  getAuth,
-  User,
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
@@ -16,23 +14,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEnvelope,
   faLock,
-  faSignOutAlt,
-  faTimes,
-  faSun,
-  faMoon,
   faUser,
-  faHome,
-  faTshirt,
-  faLaptop,
-  faShoppingCart,
-  faSearch,
-  faUtensils,
 } from '@fortawesome/free-solid-svg-icons';
 import { FaGoogle } from 'react-icons/fa'; 
 import LoadingPage from './components/LoadingPage';
 import { useAuth } from './auth/AuthContext';
-import GetProfile from './auth/GetProfile';
+import Header from './components/Header';
+import Footer from './components/Footer';
 import Image from 'next/image';
+import { getAuth } from 'firebase/auth';
 
 const Page = () => {
   const { user, username, loading: authLoading, updateUserProfile } = useAuth();
@@ -160,47 +150,13 @@ const Page = () => {
 
   return (
     <div className={`font-poppins ${theme === 'light' ? 'text-gray-800 bg-gradient-to-b from-gray-100 to-gray-200' : 'text-white bg-gradient-to-b from-black to-gray-900'}`}>
-      <header className={`fixed top-0 left-0 right-0 p-4 ${theme === 'light' ? 'bg-white text-gray-800 shadow-md' : 'bg-black text-white border-b border-gray-800'} z-50`}>
-        <nav className="flex items-center justify-between max-w-7xl mx-auto">
-          <h1 className="text-2xl font-bold flex items-center space-x-2">
-            <span>SAMAN</span>
-            <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-full border ${theme === 'light' ? 'border-gray-300 hover:bg-gray-100' : 'border-gray-600 hover:bg-gray-700'} transition duration-200 bg-transparent flex items-center justify-center`}
-            >
-              <FontAwesomeIcon icon={theme === 'light' ? faMoon : faSun} />
-            </button>
-          </h1>
-          
-          {user ? (
-            <div className="flex items-center space-x-4">
-              <Image
-                src={user.photoURL || '/default-avatar.png'}
-                alt={user.displayName || 'User photo'}
-                width={30}
-                height={30}
-                className="rounded-full"
-              />
-              <span className="text-sm font-medium">
-                {user.displayName || username || 'Anonymous'}
-              </span>
-              <button
-                onClick={() => auth.signOut()}
-                className={`px-4 py-2 rounded-full border ${theme === 'light' ? 'border-red-600 text-red-600 hover:bg-red-100' : 'border-red-500 text-red-500 hover:bg-red-600'} bg-transparent hover:bg-opacity-10 transition duration-200`}
-              >
-                <FontAwesomeIcon icon={faSignOutAlt} />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsFormVisible(prev => !prev)}
-              className={`px-4 py-2 rounded-full border ${theme === 'light' ? 'border-blue-600 text-blue-600 hover:bg-blue-100' : 'border-blue-500 text-blue-500 hover:bg-blue-600'} bg-transparent hover:bg-opacity-10 transition duration-200`}
-            >
-              {isFormVisible ? <FontAwesomeIcon icon={faTimes} size="lg" /> : 'Log In'}
-            </button>
-          )}
-        </nav>
-      </header>
+<Header
+        theme={theme}
+        user={user} 
+        toggleTheme={toggleTheme}
+        setIsFormVisible={setIsFormVisible}
+        isFormVisible={isFormVisible}
+      />
       <main className="pt-16">
         {successMessage ? (
           <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -321,45 +277,8 @@ const Page = () => {
           </div>
         )}
       </main>
-      <footer className={`fixed bottom-0 left-0 right-0 p-4 ${theme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-gray-800 text-white'} border-t border-gray-300`}>
-        <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
-          {!user ? (
-            <div className="text-center text-xs">
-              <p>Contact us: info@saman.com</p>
-              <p>About us</p>
-              <p>&copy; 2024 SAMAN</p>
-            </div>
-          ) : (
-            <div className="flex justify-between items-center w-full max-w-4xl">
-              <div className="flex items-center space-x-4">
-                <a href="#home" className="text-lg hover:text-blue-500 transition duration-200">
-                  <FontAwesomeIcon icon={faHome} className="text-sm" />
-                </a>
-                <a href="#food" className="text-lg hover:text-blue-500 transition duration-200">
-                  <FontAwesomeIcon icon={faUtensils} className="text-sm" />
-                </a>
-                <a href="#clothes" className="text-lg hover:text-blue-500 transition duration-200">
-                  <FontAwesomeIcon icon={faTshirt} className="text-sm" />
-                </a>
-                <a href="#techs" className="text-lg hover:text-blue-500 transition duration-200">
-                  <FontAwesomeIcon icon={faLaptop} className="text-sm" />
-                </a>
-                <a href="#shopping" className="text-lg hover:text-blue-500 transition duration-200">
-                  <FontAwesomeIcon icon={faShoppingCart} className="text-sm" />
-                </a>
-                <a href="#search" className="text-lg hover:text-blue-500 transition duration-200">
-                  <FontAwesomeIcon icon={faSearch} className="text-sm" />
-                </a>
-              </div>
-              <div className="text-center text-xs">
-                <p>Contact us: info@saman.com</p>
-                <p>About us</p>
-                <p>&copy; 2024 SAMAN</p>
-              </div>
-            </div>
-          )}
-        </div>
-      </footer>
+
+      <Footer theme={theme} user={!!user} />
     </div>
   );
 };
