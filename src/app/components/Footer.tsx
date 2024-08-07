@@ -31,7 +31,7 @@ const Footer: React.FC<FooterProps> = ({ theme, user }) => {
               <a href="#clothes" className="text-lg hover:text-blue-500 transition duration-200">
                 <FontAwesomeIcon icon={faTshirt} className="text-sm" />
               </a>
-              <a href="#techs" className="text-lg hover:text-blue-500 transition duration-200">
+              <a href="/test" className="text-lg hover:text-blue-500 transition duration-200">
                 <FontAwesomeIcon icon={faLaptop} className="text-sm" />
               </a>
               <a href="#shopping" className="text-lg hover:text-blue-500 transition duration-200">
