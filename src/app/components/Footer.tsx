@@ -32,7 +32,7 @@ const Footer: React.FC<FooterProps> = ({ theme, user }) => {
   return (
     <>
       <footer
-        className={`fixed bottom-0 left-0 right-0 p-4 ${theme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-gray-800 text-white'} border-t border-gray-300 shadow-md transition-shadow duration-300`}
+        className={`fixed bottom-0 left-0 right-0 p-4 ${theme === 'dark' ? 'bg-[#121213] text-white border-t border-[#444]' : 'bg-gray-100 text-gray-900 border-t border-gray-300'} shadow-md transition-shadow duration-300 ease-in-out z-50`}
       >
         <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
           {user && (
@@ -89,27 +89,31 @@ const Footer: React.FC<FooterProps> = ({ theme, user }) => {
         </div>
       </footer>
       {isSearchOpen || isAnimating ? (
-        <div
-          className={`fixed inset-0 z-50 ${isAnimating ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-          onClick={toggleSearchBar}
-        >
-          <div
-            className={`relative w-full max-w-lg mx-auto mt-20 p-4 rounded-lg shadow-lg transform transition-transform duration-300 ${isAnimating ? 'scale-75 translate-y-12 opacity-0' : 'scale-100 translate-y-0 opacity-100'} ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} ${isSearchOpen ? 'animate-expand' : ''}`}
-            onClick={(e) => e.stopPropagation()} 
-          >
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className={`w-full border rounded-md px-4 py-2 pl-10 focus:outline-none focus:ring-2 ${theme === 'light' ? 'border-gray-300 bg-white focus:ring-gray-300' : 'border-gray-600 bg-gray-800 focus:ring-gray-500'} transition duration-300 ease-in-out`}
-              />
-              <FontAwesomeIcon
-                icon={faSearch}
-                className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'} transition-transform duration-300`}
-              />
-            </div>
-          </div>
+      
+      <div
+      className={`fixed inset-0 z-50 ${isAnimating ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+      onClick={toggleSearchBar}
+    >
+      <div
+        className={`relative w-full max-w-sm mx-auto mt-24 p-4 rounded-3xl shadow-lg transform transition-transform duration-300 ${isAnimating ? 'scale-75 translate-y-12 opacity-0' : 'scale-100 translate-y-0 opacity-100'} ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} ${isSearchOpen ? 'animate-expand' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search..."
+            className={`w-full border rounded-3xl px-4 py-2 pl-10 focus:outline-none ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white focus:border-gray-500' : 'bg-gray-200 border-gray-300 text-gray-900 focus:border-blue-400'} transition duration-300 ease-in-out`}
+            aria-label="Search"
+          />
+          <FontAwesomeIcon
+            icon={faSearch}
+            className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'} transition-transform duration-300`}
+          />
         </div>
+      </div>
+    </div>
+    
+     
       ) : null}
     </>
   );

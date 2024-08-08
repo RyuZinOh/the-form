@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
@@ -10,7 +10,7 @@ import { collection, doc, setDoc, getDoc, query, where, getDocs } from 'firebase
 import { auth, firestore } from '../lib/firebase-config';
 
 const Food = () => {
-  const { user, updateUserProfile } = useAuth();
+  const { user, username, updateUserProfile } = useAuth();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [emailOrUsername, setEmailOrUsername] = useState('');
@@ -24,7 +24,6 @@ const Food = () => {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  const { username } = useAuth();
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
   
@@ -109,7 +108,7 @@ const Food = () => {
   }, [user]);
 
   return (
-    <div className={`font-poppins ${theme === 'light' ? 'text-gray-800 bg-gradient-to-b from-gray-100 to-gray-200' : 'text-white bg-gradient-to-b from-black to-gray-900'}`}>
+    <div className={`font-poppins ${theme === 'light' ? 'text-gray-800 bg-gradient-to-b from-gray-100 to-gray-200' : 'text-white bg-[#1a1a1a]'}`}>
       <Header
         theme={theme}
         user={user}
@@ -120,7 +119,9 @@ const Food = () => {
       <main className="pt-16">
         {!user ? (
           <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>Food</h1>
+            <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+              Food
+            </h1>
             <p className={`text-lg ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
               Discover our food offerings.
             </p>
@@ -152,7 +153,9 @@ const Food = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>Welcome to the Food Page, {username}</h1>
+            <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+              Welcome to the Food Page, {username}
+            </h1>
           </div>
         )}
       </main>

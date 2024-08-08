@@ -108,7 +108,7 @@ const Clothes = () => {
   }, [user]);
 
   return (
-    <div className={`font-poppins ${theme === 'light' ? 'text-gray-800 bg-gradient-to-b from-gray-100 to-gray-200' : 'text-white bg-gradient-to-b from-black to-gray-900'}`}>
+    <div className={`font-poppins ${theme === 'light' ? 'text-gray-800 bg-gradient-to-b from-gray-100 to-gray-200' : 'text-white bg-[#1a1a1a]'}`}>
       <Header
         theme={theme}
         user={user}
@@ -157,7 +157,7 @@ const Clothes = () => {
               Welcome
             </h1>
             <p className={`text-lg ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-             this is clothes section
+              This is the clothes section.
             </p>
           </div>
         )}

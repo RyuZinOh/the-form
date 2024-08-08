@@ -29,8 +29,8 @@ const AuthForm: React.FC<AuthFormProps> = ({
   toggleSignUp
 }) => {
   const containerClasses = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 md:p-6 rounded-3xl shadow-lg z-50 ${
-    theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-  } ${theme === 'dark' ? 'border border-gray-700' : 'border border-gray-300'} w-full max-w-sm backdrop-blur-lg bg-opacity-50`;
+    theme === 'dark' ? 'bg-gray-800 text-white border border-gray-700' : 'bg-white text-gray-800 border border-gray-300'
+  } w-full max-w-sm backdrop-blur-lg bg-opacity-50`;
 
   const inputClasses = `mb-3 p-3 border rounded-2xl shadow-md flex items-center ${
     theme === 'dark' ? 'bg-gray-900 text-white border-gray-700' : 'bg-gray-100 text-gray-800 border-gray-300'
@@ -48,7 +48,9 @@ const AuthForm: React.FC<AuthFormProps> = ({
 
   return (
     <div className={containerClasses}>
-      <h2 className="text-lg md:text-xl font-bold mb-4 text-center">{isSignUp ? 'Sign Up' : 'Login'}</h2>
+      <h2 className="text-lg md:text-xl font-bold mb-4 text-center">
+        {isSignUp ? 'Sign Up' : 'Login'}
+      </h2>
       <form onSubmit={onSubmit} className="flex flex-col">
         <div className="flex flex-col gap-4">
           {isSignUp && (
@@ -60,6 +62,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
                 value={usernameInput}
                 onChange={(e) => onChange(e, 'usernameInput')}
                 className="w-full bg-transparent focus:outline-none"
+                aria-label="Username"
               />
             </div>
           )}
@@ -71,6 +74,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
               value={emailOrUsername}
               onChange={(e) => onChange(e, 'emailOrUsername')}
               className="w-full bg-transparent focus:outline-none"
+              aria-label="Email or Username"
             />
           </div>
           <div className={inputClasses}>
@@ -81,17 +85,18 @@ const AuthForm: React.FC<AuthFormProps> = ({
               value={password}
               onChange={(e) => onChange(e, 'password')}
               className="w-full bg-transparent focus:outline-none"
+              aria-label="Password"
             />
           </div>
         </div>
-        <button type="submit" className={buttonClasses + ' mb-4'}>
+        <button type="submit" className={`${buttonClasses} mb-4`}>
           {isSignUp ? 'Sign Up' : 'Login'}
         </button>
         {!isSignUp && (
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            className={googleButtonClasses + ' flex items-center justify-center'}
+            className={`${googleButtonClasses} flex items-center justify-center`}
           >
             <FaGoogle className="mr-2" /> Sign in with Google
           </button>

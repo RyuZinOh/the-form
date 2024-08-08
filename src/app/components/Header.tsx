@@ -5,17 +5,18 @@ import {
   faMoon,
   faSun,
   faSignOutAlt,
-  faTimes
+  faTimes,
+  faSignInAlt
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { User } from 'firebase/auth'; 
+import { User } from 'firebase/auth';
 import { signOut } from 'firebase/auth';
-import { auth } from '../lib/firebase-config'; 
+import { auth } from '../lib/firebase-config';
 import { useAuth } from '../auth/AuthContext';
 
 interface HeaderProps {
   theme: 'light' | 'dark';
-  user: User | null;   
+  user: User | null;
   toggleTheme: () => void;
   setIsFormVisible: React.Dispatch<React.SetStateAction<boolean>>;
   isFormVisible: boolean;
@@ -42,7 +43,7 @@ const Header: React.FC<HeaderProps> = ({
             onClick={toggleTheme}
             className={`p-2 rounded-full border ${isDarkMode ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-300 hover:bg-gray-200'} transition duration-200 ease-in-out bg-transparent flex items-center justify-center`}
           >
-            <FontAwesomeIcon icon={isDarkMode ? faSun : faMoon} className={`transition-transform duration-300 ease-in-out ${isDarkMode ? 'text-yellow-500' : 'text-blue-500'}`} />
+            <FontAwesomeIcon icon={isDarkMode ? faSun : faMoon} className={`transition-transform duration-300 ease-in-out ${isDarkMode ? 'text-yellow-400' : 'text-blue-500'}`} />
           </button>
         </div>
 
@@ -62,7 +63,7 @@ const Header: React.FC<HeaderProps> = ({
               ) : (
                 <FontAwesomeIcon
                   icon={faUser}
-                  className={`text-${isDarkMode ? 'gray-200' : 'gray-800'} rounded-full bg-${isDarkMode ? 'gray-800' : 'gray-200'} transition-transform duration-300 ease-in-out`}
+                  className={`text-${isDarkMode ? 'white' : 'gray-800'} rounded-full bg-${isDarkMode ? 'transparent' : 'gray-200'} transition-transform duration-300 ease-in-out`}
                   size="2x"
                 />
               )}
@@ -71,17 +72,24 @@ const Header: React.FC<HeaderProps> = ({
               </span>
               <button
                 onClick={() => signOut(auth)}
-                className={`px-4 py-2 rounded-full border ${isDarkMode ? 'border-red-500 text-red-500 hover:bg-red-600' : 'border-red-600 text-red-600 hover:bg-red-100'} bg-transparent hover:bg-opacity-10 transition duration-200 ease-in-out`}
+                className="flex items-center justify-center p-2 rounded-full hover:bg-gray-200 transition duration-300 ease-in-out"
               >
-                <FontAwesomeIcon icon={faSignOutAlt} />
+                <FontAwesomeIcon icon={faSignOutAlt} className={`text-${isDarkMode ? 'white' : 'gray-800'}`} />
               </button>
             </>
           ) : (
             <button
-              onClick={() => setIsFormVisible(prev => !prev)}
-              className={`px-4 py-2 rounded-full border ${isDarkMode ? 'border-blue-500 text-blue-500 hover:bg-blue-600' : 'border-blue-600 text-blue-600 hover:bg-blue-100'} bg-transparent hover:bg-opacity-10 transition duration-200 ease-in-out`}
+              onClick={() => setIsFormVisible(!isFormVisible)}
+              className={`flex items-center space-x-2 p-2 rounded-full transition duration-300 ease-in-out ${
+                isFormVisible
+                  ? `bg-red-500 text-white hover:bg-red-600`
+                  : `bg-blue-500 text-white hover:bg-blue-600`
+              }`}
             >
-              {isFormVisible ? <FontAwesomeIcon icon={faTimes} size="lg" /> : 'Log In'}
+              <FontAwesomeIcon icon={isFormVisible ? faTimes : faSignInAlt} size="lg" />
+              <span className="text-base font-medium">
+                {isFormVisible ? 'Cancel' : 'Sign In'}
+              </span>
             </button>
           )}
         </div>
