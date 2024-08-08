@@ -128,7 +128,7 @@ const Page = () => {
   }
 
   return (
-    <div className={`font-poppins ${theme === 'light' ? 'text-gray-800 bg-gradient-to-b from-gray-100 to-gray-200' : 'text-white bg-gradient-to-b from-black to-gray-900'}`}>
+    <div className={`font-poppins ${theme === 'light' ? ' text-gray-800 bg-gradient-to-b from-gray-100 to-gray-200' : 'text-white bg-gradient-to-b from-black to-gray-900'}`}>
       <Header
         theme={theme}
         user={user}
@@ -136,7 +136,7 @@ const Page = () => {
         setIsFormVisible={setIsFormVisible}
         isFormVisible={isFormVisible}
       />
-      <main className="pt-16">
+      <main className={`pt-16 ${theme === 'light' ? 'bg-gradient-to-b from-gray-100 to-gray-200' : 'bg-[#1a1a1a]'}`}>
         {user ? (
           <div className="flex flex-col items-center justify-center min-h-screen p-4">
             <p className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>

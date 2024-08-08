@@ -33,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({
   const isDarkMode = theme === 'dark';
 
   return (
-    <header className={`fixed top-0 left-0 right-0 p-4 ${isDarkMode ? 'bg-gray-900 text-white border-b border-gray-700' : 'bg-gray-100 text-gray-900 border-b border-gray-300'} z-50 transition-colors duration-300 ease-in-out`}>
+    <header className={`fixed top-0 left-0 right-0 p-4 ${isDarkMode ? ' bg-[#121213]  text-white border-b border-gray-700' : 'bg-gray-100 text-gray-900 border-b border-gray-300'} z-50 transition-colors duration-300 ease-in-out`}>
       <nav className="flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center space-x-4 md:space-x-6">
           <h1 className="text-2xl font-bold flex items-center space-x-2">
