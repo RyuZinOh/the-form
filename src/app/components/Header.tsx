@@ -6,7 +6,8 @@ import {
   faSun,
   faSignOutAlt,
   faTimes,
-  faSignInAlt
+  faSignInAlt,
+  faLock
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { User } from 'firebase/auth';
@@ -80,16 +81,17 @@ const Header: React.FC<HeaderProps> = ({
           ) : (
             <button
               onClick={() => setIsFormVisible(!isFormVisible)}
-              className={`flex items-center space-x-2 p-2 rounded-full transition duration-300 ease-in-out ${
+              className={`flex items-center justify-center p-2 rounded-full transition duration-300 ease-in-out ${
                 isFormVisible
-                  ? `bg-red-500 text-white hover:bg-red-600`
-                  : `bg-blue-500 text-white hover:bg-blue-600`
+                  ? `bg-red-500 hover:bg-red-600`
+                  : `bg-blue-500 hover:bg-blue-600`
               }`}
             >
-              <FontAwesomeIcon icon={isFormVisible ? faTimes : faSignInAlt} size="lg" />
-              <span className="text-base font-medium">
-                {isFormVisible ? 'Cancel' : 'Sign In'}
-              </span>
+              <FontAwesomeIcon
+                icon={isFormVisible ? faTimes : faLock}
+                className="text-white"
+                size="lg"
+              />
             </button>
           )}
         </div>
